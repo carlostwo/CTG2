@@ -50,4 +50,5 @@ NPCs: {
 Projectiles: {
 	FoliageTendrilsProjectile.DisplayName: Foliage Tendrils Projectile
 	ZenProjectile.DisplayName: Zen Projectile
+	ChargedBowProjectile.DisplayName: Charged Bow Projectile
 }

@@ -94,8 +94,10 @@ namespace ClassesNamespace
 
 
             if (playerClass != lastPlayerClass)
-            {
-
+            {   
+                
+                // TODO: combine classes into one json (dictionary with key=className, value=[ClassHp, InventoryData])
+                // remove switch, use classData = deserialisedJson["className"][1], currentHP = deserialisedJson["className"][0]
                 switch (playerClass)
                 {
                     case 1: // Archer

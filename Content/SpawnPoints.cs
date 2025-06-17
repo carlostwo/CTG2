@@ -131,21 +131,6 @@ namespace CTG2.Content
             }
         
         }
-        public override void OnRespawn()
-        {
-            var (red, blue) = MapSpawns[currentMap];
-
-            if (Player.team == 1)
-            {
-                Player.SpawnX = red.X;
-                Player.SpawnY = red.Y;
-            }
-            else if (Player.team == 3)
-            {
-                Player.SpawnX = blue.X;
-                Player.SpawnY = blue.Y;
-            }
-        }
     }
 
     public class MapCommand : ModCommand

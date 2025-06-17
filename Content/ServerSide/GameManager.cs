@@ -3,6 +3,7 @@ using Terraria;
 using Terraria.ModLoader;
 using CTG2.Content;
 using Microsoft.Xna.Framework;
+using Terraria.WorldBuilding;
 
 namespace CTG2.Content.ServerSide;
 
@@ -21,12 +22,14 @@ public class GameManager : ModSystem
     public Gem RedGem { get; private set; }
 
     public override void OnWorldLoad()
-    {
+    {   
+        // TODO: Re-Paste the Arena on world load (in case it gets destroyed by an admin).
+        
         BlueGem  = new Gem(new Vector2(13332, 11504));     
         RedGem   = new Gem(new Vector2(19316, 11504));
 
-        BlueTeam = new GameTeam(new Vector2(12346, 10980), new Vector2(12346, 10980), 3);
-        RedTeam = new GameTeam(new Vector2(20385, 10980), new Vector2(20385, 10980), 1);
+        BlueTeam = new GameTeam(new Vector2(12346, 10940), new Vector2(12346, 10940), 3);
+        RedTeam = new GameTeam(new Vector2(20385, 10940), new Vector2(20385, 10940), 1);
         
         IsGameActive = false;
         MatchTime    = 0;
@@ -43,9 +46,12 @@ public class GameManager : ModSystem
         BlueTeam.UpdateTeam();
         RedTeam.UpdateTeam();
         
+        // Map Set
+        
+        //TODO: Create MapLoad() function (maybe using a GameMap class?)
+        
         BlueTeam.StartMatch();
         RedTeam.StartMatch();
-        // TODO: Map logic (map select?, load map from file, teleport to class select)...
         
     }
     
@@ -72,7 +78,7 @@ public class GameManager : ModSystem
     {
         // TODO: Check if each player has completed class selection (no == class select, yes == send to match)
 
-        if (MatchTime == 900)
+        if (MatchTime == 1800)
         {
             BlueTeam.SendToBase();
             RedTeam.SendToBase();
@@ -80,18 +86,50 @@ public class GameManager : ModSystem
         // Increase match duration by 1 tick
         MatchTime++;
         
-        // Updates holding/capturing status of both gems.
-        BlueGem.Update(RedGem, RedTeam.Players);
-        RedGem.Update(BlueGem, BlueTeam.Players);
+        if (MatchTime >= 1800)
+        {
+            // Updates holding/capturing status of both gems.
+            BlueGem.Update(RedGem, RedTeam.Players);
+            RedGem.Update(BlueGem, BlueTeam.Players);
+        }
         
         // Send updated GameInfo to clients
         var mod = ModContent.GetInstance<CTG2>();
         ModPacket packet = mod.GetPacket();
         packet.Write((byte)MessageType.ServerGameUpdate);
-        packet.Write((int)0);
+        if (MatchTime >= 1800)
+        {
+            packet.Write((int)2);
+        }
+        else
+        {
+            packet.Write((int)1);
+        }
+        
         packet.Write((int)MatchTime);
-        packet.Write((int)0);
-        packet.Write((int)0);
+        // Blue and red Gem X positions
+        var distBetweenGems = Math.Abs(RedGem.Position.X - BlueGem.Position.X);
+        if (BlueGem.IsHeld)
+        {   
+            // send % of the way the gem is to enemy base as an integer
+            var distFromGem = Main.player[BlueGem.HeldBy].position.X - BlueGem.Position.X;
+            var intPercentage = (int)Math.Round(distFromGem/distBetweenGems * 100);
+            intPercentage = Math.Clamp(intPercentage, 0, 100);
+            packet.Write(intPercentage);
+        }
+        else packet.Write((int)0);
+        if (RedGem.IsHeld)
+        {   
+            // send % of the way the gem is to enemy base as an integer
+            // dist from gem is negative for red
+            var distFromGem = -(Main.player[RedGem.HeldBy].position.X - RedGem.Position.X);
+            var intPercentage = (int)Math.Round(distFromGem/distBetweenGems * 100);
+            intPercentage = Math.Clamp(intPercentage, 0, 100);
+            packet.Write(intPercentage);
+        }
+        else packet.Write((int)0);
+        
+        // Blue and red gem holders
         if (BlueGem.IsHeld) packet.Write(Main.player[BlueGem.HeldBy].name); 
         else packet.Write("At Base");
         if (RedGem.IsHeld) packet.Write(Main.player[RedGem.HeldBy].name);
@@ -101,14 +139,12 @@ public class GameManager : ModSystem
         if (BlueGem.IsCaptured)
         {   
             Console.WriteLine("Blue gem captured!");
-            Main.NewText("Blue gem captured! Red wins!");
             EndGame();
         }
 
         else if (RedGem.IsCaptured)
         {
             Console.WriteLine("Red gem captured!");
-            Main.NewText("Red gem captured! Blue wins!");
             EndGame();
         }
             

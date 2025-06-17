@@ -111,9 +111,7 @@ namespace CTG2.Content
                     else
                     {
                         Main.NewText($"{Player.name}'s time is up! Assigning a random class.");
-                        ModPacket myPacket = Mod.GetPacket();
-                        myPacket.Write((byte)MessageType.RequestClass); // id
-                        myPacket.Send();
+
                         // class selelction random
                         EnterActiveState();
                     }

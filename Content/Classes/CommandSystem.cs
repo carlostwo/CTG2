@@ -7,6 +7,7 @@ using Terraria.Localization;
 using Terraria.ModLoader;
 using CTG2.Content;
 using ClassesNamespace;
+using CTG2.Content.ClientSide;
 
 
 public class ClassCommand : ModCommand
@@ -19,7 +20,7 @@ public class ClassCommand : ModCommand
     {   
         var thisPlayer = Main.LocalPlayer.GetModPlayer<MyPlayer>();
         
-        if (thisPlayer.currentState != PlayerState.ClassSelection) //!CTG2.Content.Game.preparationPhase
+        if (GameInfo.matchStage != 1) //!CTG2.Content.Game.preparationPhase
         {
             caller.Reply("You can only select a class during class selection!", Color.Red);
             return;
@@ -33,10 +34,6 @@ public class ClassCommand : ModCommand
 
         Player player = caller.Player;
         var modPlayer = player.GetModPlayer<ClassSystem>();
-        
-        ModPacket myPacket = Mod.GetPacket();
-        myPacket.Write((byte)MessageType.RequestClass); // id
-        myPacket.Send();
         
         switch (classType)
         {

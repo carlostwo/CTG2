@@ -29,7 +29,6 @@ public class GameTeam
         Players.Clear();
         foreach (Player ply in Main.player)
         {   
-            // if ((ply.name == "carlos2" && TeamColor == 3) || (ply.name == "carlos3" && TeamColor == 1)) Players.Add(ply);
             if (ply.team == TeamColor) Players.Add(ply);
         }
     }
@@ -63,8 +62,7 @@ public class GameTeam
         var mod = ModContent.GetInstance<CTG2>();
         foreach (Player ply in Players)
         {
-            ply.SpawnX = (int)BaseLocation.X;
-            ply.SpawnY = (int)BaseLocation.Y;
+
             ply.Teleport(BaseLocation);
             int tpX = (int)BaseLocation.X;
             int tpY = (int)BaseLocation.Y;
@@ -73,6 +71,18 @@ public class GameTeam
             packet2.Write(tpX);
             packet2.Write(tpY);
             packet2.Send(toClient: ply.whoAmI);
+
+            int spawnPosX = tpX / 16;
+            int spawnPosY = tpY / 16;
+
+            ply.SpawnX = spawnPosX;
+            ply.SpawnY = spawnPosY;
+            
+            ModPacket packet3 = mod.GetPacket();
+            packet3.Write((byte)MessageType.ServerSetSpawn);
+            packet3.Write(spawnPosX);
+            packet3.Write(spawnPosY);
+            packet3.Send(toClient: ply.whoAmI);
         }
         
     }
