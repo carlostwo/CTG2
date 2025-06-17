@@ -92,11 +92,8 @@ namespace CTG2.Content
         {
             Player.AddBuff(BuffID.MagicPower, 600);
 
-            if (Main.myPlayer == Player.whoAmI && Main.netMode != NetmodeID.MultiplayerClient) // server-side or singleplayer
-            {
-                int npcIndex = NPC.NewNPC(Player.GetSource_Misc("Class3Ability"), (int)Player.Center.X, (int)Player.Center.Y, ModContent.NPCType<StationaryBeast>());
-                if (Main.netMode == NetmodeID.Server) NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, npcIndex);
-            }
+            int npcIndex = NPC.NewNPC(Player.GetSource_Misc("Class3Ability"), (int)Player.Center.X, (int)Player.Center.Y, ModContent.NPCType<StationaryBeast>());
+            NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, npcIndex);
         }
 
 
@@ -140,7 +137,7 @@ namespace CTG2.Content
                 if (!other.active || other.dead || other.whoAmI == Player.whoAmI)
                     continue;
 
-                if (Vector2.Distance(Player.Center, other.Center) <= 20 * 16) // 20 block radius
+                if (Vector2.Distance(Player.Center, other.Center) <= 20 * 16 && Player.team == other.team) // 20 block radius
                 {
                     other.AddBuff(58, 200);
                     other.AddBuff(119, 200);
@@ -250,17 +247,15 @@ namespace CTG2.Content
                 if (!other.active || other.dead || other.whoAmI == Player.whoAmI)
                     continue;
 
-                if (Vector2.Distance(Player.Center, other.Center) <= 25 * 16) // 25 block radius
+                if (Vector2.Distance(Player.Center, other.Center) <= 25 * 16 && Player.team == other.team) // 25 block radius
                 {
                     other.AddBuff(103, 480);
                     other.AddBuff(26, 480);
                     other.AddBuff(2, 480);
-
-
+                    
                     NetMessage.SendData(MessageID.AddPlayerBuff, other.whoAmI, -1, null, other.whoAmI, 2, 480);
                     NetMessage.SendData(MessageID.AddPlayerBuff, other.whoAmI, -1, null, other.whoAmI, 26, 480);
                     NetMessage.SendData(MessageID.AddPlayerBuff, other.whoAmI, -1, null, other.whoAmI, 103, 480);
-                    
                 }
             }
         }
@@ -294,7 +289,8 @@ namespace CTG2.Content
 
         private void TikiPriestOnUse() //not finished
         {
-
+            int npcIndex = NPC.NewNPC(Player.GetSource_Misc("Class14Ability"), (int)Player.Center.X, (int)Player.Center.Y, ModContent.NPCType<TikiTotem>());
+            NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, npcIndex);
         }
 
 
